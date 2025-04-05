@@ -4,6 +4,7 @@ import com.powerpuffgirls.authservice.model.LoginRequest;
 import com.powerpuffgirls.authservice.model.User;
 import com.powerpuffgirls.authservice.repository.UserRepository;
 import com.powerpuffgirls.authservice.security.JWTUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -68,6 +69,17 @@ public class UserController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Something went wrong: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+
+        if (token != null && token.startsWith("Bearer ")) {
+            return ResponseEntity.ok().body("Logged out successfully");
+        } else {
+            return ResponseEntity.status(400).body("No token found to logout");
         }
     }
 }
