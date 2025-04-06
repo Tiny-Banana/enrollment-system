@@ -1,6 +1,7 @@
 package com.powerpuffgirls.courseservice.controller;
 
 import com.powerpuffgirls.courseservice.model.Course;
+import com.powerpuffgirls.courseservice.model.Enrollment;
 import com.powerpuffgirls.courseservice.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -31,15 +32,27 @@ public class CourseController {
         return ResponseEntity.ok(courses);
     }
 
+    @GetMapping("/enrollments/{courseId}")
+    public ResponseEntity<List<Enrollment>> getEnrollments(@PathVariable int courseId) {
+        List<Enrollment> enrollments = courseService.getAllEnrollmentsForCourse(courseId);
+        return ResponseEntity.ok(enrollments);
+    }
+
+//    @PostMapping("/enroll/{courseId}/{studentId}")
+//    public ResponseEntity<String> enrollStudent(@PathVariable int courseId,
+//                                                @PathVariable int studentId,
+//                                                @RequestHeader("Authorization") String authorizationHeader
+//    ) {
+//        // Construct HttpHeaders
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.set("Authorization", authorizationHeader);
+//
+//        return courseService.enrollStudentInCourse(courseId, studentId, headers);
+//    }
+
     @PostMapping("/enroll/{courseId}/{studentId}")
     public ResponseEntity<String> enrollStudent(@PathVariable int courseId,
-                                                @PathVariable int studentId,
-                                                @RequestHeader("Authorization") String authorizationHeader
-    ) {
-        // Construct HttpHeaders
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", authorizationHeader);
-
-        return courseService.enrollStudentInCourse(courseId, studentId, headers);
+                                                @PathVariable int studentId){
+        return courseService.enrollStudentInCourse(courseId, studentId);
     }
 }

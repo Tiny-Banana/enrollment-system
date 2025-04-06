@@ -3,10 +3,8 @@ package com.powerpuffgirls.courseservice.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
-@Entity
-@Table(name = "student_course")  // Map to the existing student_course table
+@Entity // Map to the existing student_course table
 public class Enrollment {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -14,16 +12,18 @@ public class Enrollment {
     @Column(name = "student_id", nullable = false)
     private int studentId;  // Reference to the Student ID, without needing a full Student entity
 
-    @ManyToOne
-    @JsonBackReference
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;  // Reference to the Course entity for course-specific data
+    @Column(name = "course_id", nullable = false)
+    private int courseId;
+//    @ManyToOne
+//    @JsonBackReference
+//    @JoinColumn(name = "course_id", nullable = false)
+//    private Course course;  // Reference to the Course entity for course-specific data
 
     public Enrollment() {}
 
-    public Enrollment(int studentId, Course course) {
+    public Enrollment(int studentId, int courseId) {
         this.studentId = studentId;
-        this.course = course;
+        this.courseId = courseId;
     }
 
     // Getters and Setters
@@ -43,11 +43,11 @@ public class Enrollment {
         this.studentId = studentId;
     }
 
-    public Course getCourse() {
-        return course;
+    public int getCourseId() {
+        return courseId;
     }
 
-    public void setCourse(Course course) {
-        this.course = course;
+    public void setCourseId(int courseId) {
+        this.courseId = courseId;
     }
 }

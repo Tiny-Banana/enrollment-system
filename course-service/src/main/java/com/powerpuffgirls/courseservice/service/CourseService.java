@@ -17,13 +17,13 @@ import java.util.Optional;
 public class CourseService {
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
-    private final RestTemplate restTemplate;
+//    private final RestTemplate restTemplate;
 
     @Autowired
     public CourseService(CourseRepository courseRepository, EnrollmentRepository enrollmentRepository, RestTemplate restTemplate) {
         this.courseRepository = courseRepository;
         this.enrollmentRepository = enrollmentRepository;
-        this.restTemplate = restTemplate;
+//        this.restTemplate = restTemplate;
     }
 
     public List<Course> getAllCourses() {
@@ -34,26 +34,31 @@ public class CourseService {
         return courseRepository.findAvailableCourses();
     }
 
-    public StudentDTO getStudentInfo(int studentId, HttpHeaders headers) {
-        String url = "http://localhost:8080/api/user/" + studentId;
-
-        try {
-            // Create an HttpEntity using the provided headers
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-
-            // Make the GET request with the headers
-            ResponseEntity<StudentDTO> response = restTemplate.exchange(url, HttpMethod.GET, entity, StudentDTO.class);
-
-            return response.getBody();
-        } catch (Exception e) {
-            // If the API call fails, log the error and return a fallback response
-            System.err.println("Failed to fetch student details from AuthService: " + e.getMessage());
-            return null; // Return null or a default fallback
-        }
+    public List<Enrollment> getAllEnrollmentsForCourse(int courseId) {
+        return enrollmentRepository.findByCourseId(courseId);
     }
 
-    public ResponseEntity<String> enrollStudentInCourse(int courseId, int studentId, HttpHeaders headers
-    ) {
+//    public StudentDTO getStudentInfo(int studentId, HttpHeaders headers) {
+//        String url = "http://localhost:8080/api/user/" + studentId;
+//
+//        try {
+//            // Create an HttpEntity using the provided headers
+//            HttpEntity<String> entity = new HttpEntity<>(headers);
+//
+//            // Make the GET request with the headers
+//            ResponseEntity<StudentDTO> response = restTemplate.exchange(url, HttpMethod.GET, entity, StudentDTO.class);
+//
+//            return response.getBody();
+//        } catch (Exception e) {
+//            // If the API call fails, log the error and return a fallback response
+//            System.err.println("Failed to fetch student details from AuthService: " + e.getMessage());
+//            return null; // Return null or a default fallback
+//        }
+//    }
+
+    // public ResponseEntity<String> enrollStudentInCourse(int courseId, int studentId, HttpHeaders headers
+//    )
+    public ResponseEntity<String> enrollStudentInCourse(int courseId, int studentId) {
         // Retrieve course
         Optional<Course> courseOptional = courseRepository.findById(courseId);
         if (courseOptional.isEmpty()) {
@@ -74,13 +79,14 @@ public class CourseService {
         }
 
         // Verify that the student exists via AuthService
-        StudentDTO student = getStudentInfo(studentId, headers);
-        if (student == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found");
-        }
+//        StudentDTO student = getStudentInfo(studentId, headers);
+//        if (student == null) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found");
+//        }
 
         // Enroll the student
-        Enrollment enrollment = new Enrollment(studentId, course);
+        // can just not reference the course, but just only the cid
+        Enrollment enrollment = new Enrollment(studentId, courseId);
         enrollmentRepository.save(enrollment);
 
         // Update and save course

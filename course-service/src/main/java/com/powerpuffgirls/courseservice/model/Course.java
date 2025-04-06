@@ -40,17 +40,18 @@ public class Course {
     @Column(nullable = false)
     private int max_students; // Maximum number of students allowed
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private Set<Enrollment> enrollments = new HashSet<>(); // Direct reference to Enrollment
+//    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @JsonManagedReference
 
-    public Set<Enrollment> getEnrollments() {
-        return enrollments;
-    }
+//    private Set<Enrollment> enrollments = new HashSet<>(); // Direct reference to Enrollment
 
-    public void setEnrollments(Set<Enrollment> enrollments) {
-        this.enrollments = enrollments;
-    }
+//    public Set<Enrollment> getEnrollments() {
+//        return enrollments;
+//    }
+//
+//    public void setEnrollments(Set<Enrollment> enrollments) {
+//        this.enrollments = enrollments;
+//    }
 
     public int getEnrolledStudents() {
         return enrolled_students;
