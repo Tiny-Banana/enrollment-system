@@ -13,16 +13,32 @@ import org.springframework.http.ResponseEntity;
 import java.util.Optional;
 
 @Service
-public class AuthService {
-    @Autowired
-    private UserRepository userRepository;
+public class UserService {
+    private final UserRepository userRepository;
+    private final JWTUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    private JWTUtil jwtUtil;
+    public UserService(UserRepository userRepository, JWTUtil jwtUtil, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.jwtUtil = jwtUtil;
+        this.passwordEncoder = passwordEncoder;
+    }
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
+    public ResponseEntity<?> findUser(int id) {
+        try {
+            Optional<User> userOptional = userRepository.findById(id);
+            if (userOptional.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+            return ResponseEntity.ok(userOptional.get());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Something went wrong: " + e.getMessage());
+        }
+    }
+    
     public ResponseEntity<?> register(User user) {
         try {
             // Check if the username is already taken
@@ -61,7 +77,7 @@ public class AuthService {
             }
 
             // Generate a JWT token for the user
-            String token = jwtUtil.generateToken(user.getUsername(), user.getRole());
+            String token = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getRole());
 
             return ResponseEntity.ok().body("Bearer " + token);
         } catch (Exception e) {

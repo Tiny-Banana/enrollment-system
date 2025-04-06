@@ -14,10 +14,11 @@ public class JWTUtil {
 
     private final long EXPIRATION_TIME = 1000 * 60 * 60; // 1 hour
 
-    public String generateToken(String username, String role) {
+    public String generateToken(String username, int id, String role) {
         return Jwts.builder()
                 .setSubject(username)
-                .claim("role", role)
+                .claim("id", id) // Include user ID
+                .claim("role", role) // Include user role
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
@@ -34,6 +35,13 @@ public class JWTUtil {
         return Jwts.parser().setSigningKey(SECRET_KEY)
                 .parseClaimsJws(token)
                 .getBody().get("role", String.class);
+    }
+
+    public int getId(String token) {
+        return Jwts.parser().setSigningKey(SECRET_KEY)
+                .parseClaimsJws(token)
+                .getBody()
+                .get("id", Integer.class);
     }
 
     public boolean validateToken(String token) {
