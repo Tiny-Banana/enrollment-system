@@ -30,6 +30,28 @@ public class Course {
     @Column(nullable = false)
     private int year;
 
+    @Column(nullable = false)
+    private int enrolled_students; // Number of students currently enrolled
+
+    @Column(nullable = false)
+    private int max_students; // Maximum number of students allowed
+
+    public int getEnrolled_students() {
+        return enrolled_students;
+    }
+
+    public void setEnrolled_students(int enrolled_students) {
+        this.enrolled_students = enrolled_students;
+    }
+
+    public int getMax_students() {
+        return max_students;
+    }
+
+    public void setMax_students(int max_students) {
+        this.max_students = max_students;
+    }
+
     public Course() {
     }
 

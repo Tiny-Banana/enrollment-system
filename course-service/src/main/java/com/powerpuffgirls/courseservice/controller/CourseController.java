@@ -20,8 +20,13 @@ public class CourseController {
         this.courseService = courseService;
     }
 
-    // Endpoint to view all available courses
     @GetMapping()
+    public ResponseEntity<List<Course>> getAllCourses() {
+        List<Course> courses = courseService.getAllCourses();
+        return ResponseEntity.ok(courses);
+    }
+
+    @GetMapping("/available")
     public ResponseEntity<List<Course>> getAvailableCourses() {
         List<Course> courses = courseService.getAvailableCourses();
         return ResponseEntity.ok(courses);

@@ -17,6 +17,10 @@ public class CourseService {
     }
 
     public List<Course> getAvailableCourses() {
-        return courseRepository.findAll(); // Fetches all courses
+        return courseRepository.findAvailableCourses(); // Fetches all courses
+    }
+
+    public List<Course> getAllCourses() {
+        return courseRepository.findAll();
     }
 }
