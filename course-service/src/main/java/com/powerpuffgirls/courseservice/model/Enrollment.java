@@ -1,5 +1,6 @@
 package com.powerpuffgirls.courseservice.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -14,6 +15,7 @@ public class Enrollment {
     private int studentId;  // Reference to the Student ID, without needing a full Student entity
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;  // Reference to the Course entity for course-specific data
 

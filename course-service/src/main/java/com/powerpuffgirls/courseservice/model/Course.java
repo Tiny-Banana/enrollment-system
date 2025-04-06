@@ -1,5 +1,6 @@
 package com.powerpuffgirls.courseservice.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
@@ -40,6 +41,7 @@ public class Course {
     private int max_students; // Maximum number of students allowed
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private Set<Enrollment> enrollments = new HashSet<>(); // Direct reference to Enrollment
 
     public Set<Enrollment> getEnrollments() {
