@@ -2,13 +2,16 @@ package com.powerpuffgirls.authservice.security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
 @Component
 public class JWTUtil {
-    private final String SECRET_KEY = "mysecretkey";
+    @Value("${jwt.secret.key}")
+    private String SECRET_KEY;
+
     private final long EXPIRATION_TIME = 1000 * 60 * 60; // 1 hour
 
     public String generateToken(String username, String role) {
