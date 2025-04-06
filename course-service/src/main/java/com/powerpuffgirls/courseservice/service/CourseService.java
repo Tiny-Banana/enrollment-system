@@ -5,6 +5,7 @@ import com.powerpuffgirls.courseservice.model.Enrollment;
 import com.powerpuffgirls.courseservice.model.StudentDTO;
 import com.powerpuffgirls.courseservice.repository.CourseRepository;
 import com.powerpuffgirls.courseservice.repository.EnrollmentRepository;
+import com.powerpuffgirls.courseservice.security.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -18,11 +19,13 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
 //    private final RestTemplate restTemplate;
+    private final JWTUtil jwtUtil;
 
     @Autowired
-    public CourseService(CourseRepository courseRepository, EnrollmentRepository enrollmentRepository, RestTemplate restTemplate) {
+    public CourseService(CourseRepository courseRepository, EnrollmentRepository enrollmentRepository, RestTemplate restTemplate, JWTUtil jwtUtil) {
         this.courseRepository = courseRepository;
         this.enrollmentRepository = enrollmentRepository;
+        this.jwtUtil = jwtUtil;
 //        this.restTemplate = restTemplate;
     }
 
@@ -58,7 +61,20 @@ public class CourseService {
 
     // public ResponseEntity<String> enrollStudentInCourse(int courseId, int studentId, HttpHeaders headers
 //    )
-    public ResponseEntity<String> enrollStudentInCourse(int courseId, int studentId) {
+    public ResponseEntity<String> enrollStudentInCourse(int courseId, int studentId, String authorizationHeader) {
+        String token = authorizationHeader.replace("Bearer ", "");
+
+        String role = jwtUtil.getRole(token);
+        int currentUserId = jwtUtil.getId(token);
+
+        if (!role.equals("student") && currentUserId != studentId) {
+            return ResponseEntity.status(403).body("Access denied: You do not have permission to enroll.");
+        }
+
+        // Construct HttpHeaders
+        //        HttpHeaders headers = new HttpHeaders();
+        //        headers.set("Authorization", authorizationHeader);
+
         // Retrieve course
         Optional<Course> courseOptional = courseRepository.findById(courseId);
         if (courseOptional.isEmpty()) {
