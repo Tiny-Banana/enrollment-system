@@ -2,6 +2,9 @@ package com.powerpuffgirls.courseservice.model;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 public class Course {
     @Id
@@ -36,19 +39,30 @@ public class Course {
     @Column(nullable = false)
     private int max_students; // Maximum number of students allowed
 
-    public int getEnrolled_students() {
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Enrollment> enrollments = new HashSet<>(); // Direct reference to Enrollment
+
+    public Set<Enrollment> getEnrollments() {
+        return enrollments;
+    }
+
+    public void setEnrollments(Set<Enrollment> enrollments) {
+        this.enrollments = enrollments;
+    }
+
+    public int getEnrolledStudents() {
         return enrolled_students;
     }
 
-    public void setEnrolled_students(int enrolled_students) {
+    public void setEnrolledStudents(int enrolled_students) {
         this.enrolled_students = enrolled_students;
     }
 
-    public int getMax_students() {
+    public int getMaxStudents() {
         return max_students;
     }
 
-    public void setMax_students(int max_students) {
+    public void setMaxStudents(int max_students) {
         this.max_students = max_students;
     }
 

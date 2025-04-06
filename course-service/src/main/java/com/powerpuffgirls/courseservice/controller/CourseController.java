@@ -3,10 +3,9 @@ package com.powerpuffgirls.courseservice.controller;
 import com.powerpuffgirls.courseservice.model.Course;
 import com.powerpuffgirls.courseservice.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -30,5 +29,17 @@ public class CourseController {
     public ResponseEntity<List<Course>> getAvailableCourses() {
         List<Course> courses = courseService.getAvailableCourses();
         return ResponseEntity.ok(courses);
+    }
+
+    @PostMapping("/enroll/{courseId}/{studentId}")
+    public ResponseEntity<String> enrollStudent(@PathVariable int courseId,
+                                                @PathVariable int studentId,
+                                                @RequestHeader("Authorization") String authorizationHeader
+    ) {
+        // Construct HttpHeaders
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", authorizationHeader);
+
+        return courseService.enrollStudentInCourse(courseId, studentId, headers);
     }
 }

@@ -12,4 +12,5 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 //    List<Course> findByEnrolledStudentsLessThanMaxStudents();
     @Query("SELECT c FROM Course c WHERE c.enrolled_students < c.max_students")
     List<Course> findAvailableCourses();
+
 }
