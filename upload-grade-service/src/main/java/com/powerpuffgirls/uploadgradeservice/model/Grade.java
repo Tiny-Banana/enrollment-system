@@ -1,20 +1,25 @@
-package com.powerpuffgirls.gradeservice.model;
+package com.powerpuffgirls.uploadgradeservice.model;
+
+import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 
-public class GradeRequest {
-    private int facultyId;
+@Entity
+public class Grade {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Column(nullable = false)
     private int studentId;
+
+    @Column(nullable = false)
     private int courseId;
+
+    @Column(nullable = false)
     private BigDecimal grade;
 
-    public int getFacultyId() {
-        return facultyId;
-    }
-
-    public void setFacultyId(int facultyId) {
-        this.facultyId = facultyId;
-    }
+    public Grade() {}
 
     public BigDecimal getGrade() {
         return grade;
