@@ -2,10 +2,8 @@ package com.powerpuffgirls.courseservice.controller;
 
 import com.powerpuffgirls.courseservice.model.Course;
 import com.powerpuffgirls.courseservice.model.Enrollment;
-import com.powerpuffgirls.courseservice.security.JWTUtil;
 import com.powerpuffgirls.courseservice.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,12 +13,10 @@ import java.util.List;
 @RequestMapping("/api/courses")
 public class CourseController {
     private final CourseService courseService;
-    private final JWTUtil jwtUtil;
 
     @Autowired
-    public CourseController(CourseService courseService, JWTUtil jwtUtil) {
+    public CourseController(CourseService courseService) {
         this.courseService = courseService;
-        this.jwtUtil = new JWTUtil();
     }
 
     @GetMapping()
