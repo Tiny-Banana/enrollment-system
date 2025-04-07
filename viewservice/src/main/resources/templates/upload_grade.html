@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Upload Grades</title></head>
+<body>
+<h1>Upload Grade for Student X in Course X</h1>
+<form method="post" action="/api/grades/upload">
+    <label>Student ID:</label><input type="number" name="studentId"/><br/>
+    <label>Course ID:</label><input type="number" name="courseId"/><br/>
+    <label>Grade:</label><input type="text" name="grade"/><br/>
+    <button type="submit">Upload</button>
+</form>
+</body>
+</html>
