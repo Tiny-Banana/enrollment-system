@@ -79,7 +79,7 @@ public class UserService {
             // Generate a JWT token for the user
             String token = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getRole());
 
-            return ResponseEntity.ok().body("Bearer " + token);
+            return ResponseEntity.ok().body(token);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Something went wrong: " + e.getMessage());

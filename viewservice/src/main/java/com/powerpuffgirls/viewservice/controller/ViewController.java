@@ -1,15 +1,16 @@
 package com.powerpuffgirls.viewservice.controller;
 
+import com.powerpuffgirls.authservice.model.LoginRequest;
+import com.powerpuffgirls.authservice.model.User;
 import com.powerpuffgirls.courseservice.model.Course;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -18,11 +19,43 @@ public class ViewController {
     @Autowired
     private RestTemplate restTemplate;
 
+    private static final String AUTH_CONT_URL = "http://localhost:8082/api/user";
     private static final String COURSE_CONT_URL = "http://localhost:8081/api/courses";
 
+
+    //authentication node
     @GetMapping("/login")
     public String loginPage() {
         return "login";
+    }
+
+    @PostMapping("/login")
+    public String login(LoginRequest loginRequest, Model model) {
+
+        String loginURL = AUTH_CONT_URL + "/login";
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json");
+
+            HttpEntity<LoginRequest> request = new HttpEntity<>(loginRequest, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(loginURL, HttpMethod.POST, request, String.class);
+
+            String token = response.getBody();
+
+            if (response.getStatusCode() == HttpStatus.OK && token != null) {
+                model.addAttribute("token", token);
+                return "redirect:/dashboard";
+            } else {
+                model.addAttribute("errorMessage", "Invalid credentials, please try again.");
+                return "login";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.addAttribute("errorMessage", "An error occurred while logging in.");
+            return "login";
+        }
     }
 
     @GetMapping("/register")
@@ -30,15 +63,45 @@ public class ViewController {
         return "register";
     }
 
+    @PostMapping("/register")
+    public String register(User user, Model model) {
+
+        String registerURL = AUTH_CONT_URL + "/register";
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Content-Type", "application/json");
+
+            HttpEntity<User> request = new HttpEntity<>(user, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(registerURL, HttpMethod.POST, request, String.class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                model.addAttribute("message", "Registration successful. Please login.");
+                return "login";
+            } else {
+                model.addAttribute("error", "Registration failed: " + response.getBody());
+                return "register";
+            }
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Something went wrong: " + e.getMessage());
+            return "register";
+        }
+    }
+
+    //================
     @GetMapping("/dashboard")
     public String viewDashboard() {
         return "dashboard";
     }
+    //=================
 
+    //course node
     @GetMapping("/courses")
     public String viewCourses(Model model) {
 
-        String viewCoursesURL = COURSE_CONT_URL + "/available";
+        String viewCoursesURL = COURSE_CONT_URL;
         try {
             ResponseEntity<List> response = restTemplate.exchange(viewCoursesURL, HttpMethod.GET, null, List.class);
 
@@ -53,6 +116,7 @@ public class ViewController {
         return "courses";
     }
 
+    //enrollment node?
     @GetMapping("/enrollments")
     public String viewEnrollments() {
         //@RequestParam("courseId") int courseId, Model model
@@ -63,12 +127,14 @@ public class ViewController {
         return "enrollments";
     }
 
-
+    //enrollment node
     @GetMapping("/enroll")
     public String enroll() {
         //model.addAttribute("courseId", courseId);
         return "enroll";
     }
+
+    //grades node
 
     @GetMapping("/grades")
     public String viewGrades() {

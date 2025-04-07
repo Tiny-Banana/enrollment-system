@@ -3,11 +3,12 @@
 <head><title>Login</title></head>
 <body>
 <h1>Login</h1>
-<form method="post" action="/api/auth/login">
+<form method="post" action="/login">
     <label>Email:</label><input type="text" name="email"/><br/>
     <label>Password:</label><input type="password" name="password"/><br/>
     <button type="submit">Login</button>
 </form>
+<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
 <p>Don't have an account? <a href="/register">Register</a></p>
 </body>
 </html>
