@@ -25,7 +25,7 @@ public class GradeController {
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadGrade(@RequestBody GradeRequest gradeRequest,
-                                              @RequestHeader("Authorization") String     authorizationHeader) {
+                                              @RequestHeader("Authorization") String authorizationHeader) {
         return gradeService.uploadGrade(gradeRequest,     authorizationHeader);
     }
 }

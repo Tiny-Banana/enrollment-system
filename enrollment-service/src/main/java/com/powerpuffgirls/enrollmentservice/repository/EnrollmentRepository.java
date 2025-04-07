@@ -1,6 +1,6 @@
-package com.powerpuffgirls.courseservice.repository;
+package com.powerpuffgirls.enrollmentservice.repository;
 
-import com.powerpuffgirls.courseservice.model.Enrollment;
+import com.powerpuffgirls.enrollmentservice.model.Enrollment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -1,0 +1,6 @@
+jwt:
+  secret:
+    key: ${{JWT_SECRET_KEY:super-secret-key}
+
+server:
+  port: 8082
