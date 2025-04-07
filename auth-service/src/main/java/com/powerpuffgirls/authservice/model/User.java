@@ -1,5 +1,6 @@
 package com.powerpuffgirls.authservice.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -82,7 +83,15 @@ public class User implements UserDetails {
         this.role = role;
     }
 
+    public Set<String> getAuthorityStrings() {
+        return Collections.singleton("ROLE_" + this.role); // Send roles as strings
+    }
+
+    @Override
+    @JsonDeserialize(contentAs = SimpleGrantedAuthority.class)
     public Set<GrantedAuthority> getAuthorities() {
         return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + this.role));
     }
+
+
 }

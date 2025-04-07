@@ -13,12 +13,18 @@
     <label for="password">Password:</label>
     <input type="password" id="password" name="password" required>
 
-    <label for="role">Role:</label>
-    <input type="text" id="role" name="role" required>
+    <label for="role">Select Role:</label>
+    <select id="role" name="role" required>
+        <option value="" disabled selected>Select your role</option>
+        <option value="FACULTY">FACULTY</option>
+        <option value="STUDENT">STUDENT</option>
+    </select>
+
+    <p th:if="${errorMessage}" th:text="${errorMessage}"></p>
 
     <button type="submit">Register</button>
 </form>
 
-<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+
 </body>
 </html>

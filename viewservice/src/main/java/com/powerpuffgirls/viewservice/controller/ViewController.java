@@ -19,9 +19,8 @@ public class ViewController {
     @Autowired
     private RestTemplate restTemplate;
 
-    private static final String AUTH_CONT_URL = "http://localhost:8082/api/user";
+    private static final String AUTH_CONT_URL = "http://localhost:8083/api/user";
     private static final String COURSE_CONT_URL = "http://localhost:8081/api/courses";
-
 
     //authentication node
     @GetMapping("/login")
@@ -68,6 +67,8 @@ public class ViewController {
 
         String registerURL = AUTH_CONT_URL + "/register";
 
+        System.out.println("User: " + user.getName() + " " + user.getUsername() + " " + user.getPassword() + " " + user.getRole());
+
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.set("Content-Type", "application/json");
@@ -81,11 +82,13 @@ public class ViewController {
                 return "login";
             } else {
                 model.addAttribute("error", "Registration failed: " + response.getBody());
+                System.out.println(response.getBody());
                 return "register";
             }
 
         } catch (Exception e) {
             model.addAttribute("error", "Something went wrong: " + e.getMessage());
+            System.out.println(e.getMessage());
             return "register";
         }
     }
