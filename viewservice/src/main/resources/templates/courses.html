@@ -6,20 +6,27 @@
 <body>
 <h1>Available Courses</h1>
 
-<table border="1">
+<div th:if="${errorMessage}" class="alert alert-danger">
+  <p th:text="${errorMessage}"></p>
+</div>
+
+ <table border="1">
   <thead>
   <tr>
     <th>Course ID</th>
     <th>Course Name</th>
+    <th>Course Instructor</th>
     <th>Actions</th>
   </tr>
   </thead>
   <tbody>
-  <tr>
+  <tr th:each="course : ${courses}">
+    <td th:text="${course.id}"></td>
+    <td th:text="${course.name}"></td>
+    <td th:text="${course.instructor}"></td>
     <td>
-    <td>Intro to CS</td>
-    <td>
-      <a href="/enroll">Enroll</a> <!-- should be just an api call -->
+      <!-- Link for enrollment -->
+      <a href="enroll">Enroll</a>
     </td>
   </tr>
   </tbody>

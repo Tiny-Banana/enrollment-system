@@ -1,10 +1,24 @@
 package com.powerpuffgirls.viewservice.controller;
 
+import com.powerpuffgirls.courseservice.model.Course;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 public class ViewController {
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    private static final String COURSE_CONT_URL = "http://localhost:8081/api/courses";
 
     @GetMapping("/login")
     public String loginPage() {
@@ -22,7 +36,20 @@ public class ViewController {
     }
 
     @GetMapping("/courses")
-    public String viewCourses() {
+    public String viewCourses(Model model) {
+
+        String viewCoursesURL = COURSE_CONT_URL + "/available";
+        try {
+            ResponseEntity<List> response = restTemplate.exchange(viewCoursesURL, HttpMethod.GET, null, List.class);
+
+            List<Course> courses = response.getBody();
+            model.addAttribute("courses", courses);
+
+        } catch (Exception e) {
+            System.err.println("Error fetching courses: " + e.getMessage());
+            model.addAttribute("errorMessage", "Unable to fetch courses at the moment. Please try again later.");
+        }
+
         return "courses";
     }
 
