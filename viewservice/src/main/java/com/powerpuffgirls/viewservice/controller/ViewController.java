@@ -76,10 +76,12 @@ public class ViewController {
             HttpEntity<User> request = new HttpEntity<>(user, headers);
 
             ResponseEntity<String> response = restTemplate.exchange(registerURL, HttpMethod.POST, request, String.class);
+            String token = response.getBody();
 
-            if (response.getStatusCode() == HttpStatus.OK) {
-                model.addAttribute("message", "Registration successful. Please login.");
-                return "login";
+            if (response.getStatusCode() == HttpStatus.CREATED && token != null) {
+                System.out.println("Token " + token);
+                model.addAttribute("token", token);
+                return "redirect:/dashboard";
             } else {
                 model.addAttribute("error", "Registration failed: " + response.getBody());
                 System.out.println(response.getBody());

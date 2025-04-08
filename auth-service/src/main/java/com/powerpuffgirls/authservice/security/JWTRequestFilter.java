@@ -35,8 +35,6 @@ public class JWTRequestFilter extends OncePerRequestFilter {
 
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7); // Remove "Bearer " from the token
-
             if (jwtUtil.validateToken(token)) {
                 String username = jwtUtil.getUsername(token);
                 int id = jwtUtil.getId(token); // Extract the ID

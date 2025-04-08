@@ -52,7 +52,9 @@ public class UserService {
             // Save the user
             userRepository.save(user);
 
-            return ResponseEntity.ok("User registered successfully");
+            String token = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getRole());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(token);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
