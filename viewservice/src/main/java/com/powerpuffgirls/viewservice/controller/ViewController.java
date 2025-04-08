@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -43,18 +44,27 @@ public class ViewController {
 
             String token = response.getBody();
 
+            System.out.println(response.getBody());
+
             if (response.getStatusCode() == HttpStatus.OK && token != null) {
                 model.addAttribute("token", token);
-                return "redirect:/dashboard";
-            } else {
-                model.addAttribute("errorMessage", "Invalid credentials, please try again.");
-                return "login";
             }
+
+            return "login";
+
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                model.addAttribute("error", "Invalid credentials. Please try again.");
+            } else {
+                model.addAttribute("error", "Error: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+            }
+            return "login";
         } catch (Exception e) {
             e.printStackTrace();
-            model.addAttribute("errorMessage", "An error occurred while logging in.");
+            model.addAttribute("error", "An unexpected error occurred: " + e.getMessage());
             return "login";
         }
+
     }
 
     @GetMapping("/register")
@@ -66,8 +76,6 @@ public class ViewController {
     public String register(User user, Model model) {
 
         String registerURL = AUTH_CONT_URL + "/register";
-
-        System.out.println("User: " + user.getName() + " " + user.getUsername() + " " + user.getPassword() + " " + user.getRole());
 
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -82,6 +90,7 @@ public class ViewController {
                 System.out.println("Token " + token);
                 model.addAttribute("token", token);
             } else {
+                //TODO: error validation
                 model.addAttribute("error", "Registration failed: " + response.getBody());
             }
 

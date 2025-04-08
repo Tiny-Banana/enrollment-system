@@ -22,9 +22,6 @@
 
     <p th:if="${error}" th:text="${error}"></p>
 
-    <p>Token for debug: <span th:if="${token}" th:text="${token}">No token</span></p>
-
-
     <button type="submit">Register</button>
 </form>
 
@@ -33,7 +30,7 @@
 
 <script th:inline="javascript">
     const token = /*[[${token}]]*/ "";
-    console.log("Token from Thymeleaf Inline: " + token);
+    console.log("Token: " + token);
 
     if (token && token !== "null" && token !== "") {
         localStorage.setItem("authToken", token);

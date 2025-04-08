@@ -4,11 +4,23 @@
 <body>
 <h1>Login</h1>
 <form method="post" action="/login">
-    <label>Email:</label><input type="text" name="email"/><br/>
-    <label>Password:</label><input type="password" name="password"/><br/>
+    <label>Username:</label><input type="text" name="username" required/><br/>
+    <label>Password:</label><input type="password" name="password" required/><br/>
     <button type="submit">Login</button>
 </form>
-<p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+<p th:if="${error}" th:text="${error}"></p>
 <p>Don't have an account? <a href="/register">Register</a></p>
 </body>
+
+<script th:inline="javascript">
+    const token = /*[[${token}]]*/ "";
+    console.log("Token: " + token);
+
+    if (token && token !== "null" && token !== "") {
+        localStorage.setItem("authToken", token);
+        alert("Login successful! Redirecting to dashboard...");
+        window.location.href = "/dashboard";
+    }
+</script>
+
 </html>

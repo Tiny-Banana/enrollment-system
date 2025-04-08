@@ -68,18 +68,22 @@ public class UserService {
             Optional<User> userOptional = userRepository.findByUsername(request.getUsername());
 
             if (userOptional.isEmpty()) {
-                return ResponseEntity.status(401).body("Invalid credentials");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
             }
 
             User user = userOptional.get();
 
             // Check if the password matches
             if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-                return ResponseEntity.status(401).body("Invalid credentials");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
             }
+
+            System.out.println("All good.. Generating token..");
 
             // Generate a JWT token for the user
             String token = jwtUtil.generateToken(user.getUsername(), user.getId(), user.getRole());
+
+            System.out.println("Token generated: " + token);
 
             return ResponseEntity.ok().body(token);
         } catch (Exception e) {
