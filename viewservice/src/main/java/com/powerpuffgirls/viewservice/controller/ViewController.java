@@ -81,12 +81,11 @@ public class ViewController {
             if (response.getStatusCode() == HttpStatus.CREATED && token != null) {
                 System.out.println("Token " + token);
                 model.addAttribute("token", token);
-                return "redirect:/dashboard";
             } else {
                 model.addAttribute("error", "Registration failed: " + response.getBody());
-                System.out.println(response.getBody());
-                return "register";
             }
+
+            return "register";
 
         } catch (Exception e) {
             model.addAttribute("error", "Something went wrong: " + e.getMessage());

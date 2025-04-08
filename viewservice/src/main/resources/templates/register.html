@@ -20,7 +20,10 @@
         <option value="STUDENT">STUDENT</option>
     </select>
 
-    <p th:if="${errorMessage}" th:text="${errorMessage}"></p>
+    <p th:if="${error}" th:text="${error}"></p>
+
+    <p>Token for debug: <span th:if="${token}" th:text="${token}">No token</span></p>
+
 
     <button type="submit">Register</button>
 </form>
@@ -28,25 +31,17 @@
 
 </body>
 
-<script>
-    // This script handles token storage if provided
-    function storeToken(token) {
-        if (token) {
-            localStorage.setItem("authToken", token); // Store the token
-            alert("Registration successful! You are now logged in.");
-            window.location.href = "/dashboard"; // Redirect to the dashboard
-        } else {
-            alert("Registration successful! Please log in.");
-            window.location.href = "/login"; // Redirect to login if no token is returned
-        }
-    }
-
+<script th:inline="javascript">
     const token = /*[[${token}]]*/ "";
-    if (token) {
-        console.log("Token received: " + token);
-        storeToken(token); // Handle token storage and redirection
-    }
+    console.log("Token from Thymeleaf Inline: " + token);
 
+    if (token && token !== "null" && token !== "") {
+        localStorage.setItem("authToken", token);
+        alert("Registration successful! Redirecting to dashboard...");
+        window.location.href = "/dashboard";
+    }
 </script>
+
+
 
 </html>
