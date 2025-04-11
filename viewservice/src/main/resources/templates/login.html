@@ -1,26 +1,69 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head><title>Login</title></head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/js/axiosConfig.js" type="module"></script>
+</head>
 <body>
 <h1>Login</h1>
-<form method="post" action="/login">
-    <label>Username:</label><input type="text" name="username" required/><br/>
-    <label>Password:</label><input type="password" name="password" required/><br/>
+<div id="errorMessage" style="color: red;"></div>
+
+<form id="loginForm">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required><br/>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br/>
+
     <button type="submit">Login</button>
 </form>
-<p th:if="${error}" th:text="${error}"></p>
+
 <p>Don't have an account? <a href="/register">Register</a></p>
-</body>
 
-<script th:inline="javascript">
-    const token = /*[[${token}]]*/ "";
-    console.log("Token: " + token);
+<script type="module">
+    import { validateToken } from "/js/axiosConfig.js";
 
-    if (token && token !== "null" && token !== "") {
-        localStorage.setItem("authToken", token);
-        alert("Login successful! Redirecting to dashboard...");
+    // Check if a token already exists, redirect to dashboard if it does
+    if (validateToken()) {
+        alert("You are already logged in! Redirecting to dashboard...");
         window.location.href = "/dashboard";
+    } else {
+        //invalid token
+        localStorage.removeItem("authToken");
     }
-</script>
 
+    // Handle login functionality
+    document.getElementById("loginForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        const loginData = { username, password };
+
+        console.log("Login attempt:", loginData);
+
+        try {
+            const response = await axios.post("http://localhost:8083/api/user/login", loginData);
+
+            if (response.status === 200) {
+                const token = response.data;
+                localStorage.setItem("authToken", token); // Save token to local storage
+                alert("Login successful! Redirecting to dashboard...");
+                window.location.href = "/dashboard";
+            } else {
+                document.getElementById("errorMessage").textContent = "Unexpected error occurred.";
+            }
+        } catch (error) {
+            console.error("Login error:", error);
+            const errorMessage = error.response?.data || "Invalid credentials. Please try again.";
+            document.getElementById("errorMessage").textContent = errorMessage;
+        }
+    });
+</script>
+</body>
 </html>

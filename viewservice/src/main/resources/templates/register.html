@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><title>Register</title></head>
+<head>
+    <title>Register</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+    <script src="/js/axiosConfig.js" type="module"></script>
+</head>
 <body>
 <h1>Register</h1>
-<form action="/register" method="post">
+<form id="registerForm">
     <label for="name">Name:</label>
     <input type="text" id="name" name="name" required>
 
@@ -20,25 +25,58 @@
         <option value="STUDENT">STUDENT</option>
     </select>
 
-    <p th:if="${error}" th:text="${error}"></p>
+    <p id="errorMessage" style="color: red;"></p> <!-- Error placeholder -->
 
     <button type="submit">Register</button>
 </form>
 
+<script type="module">
 
-</body>
+    import { validateToken } from "/js/axiosConfig.js";
 
-<script th:inline="javascript">
-    const token = /*[[${token}]]*/ "";
-    console.log("Token: " + token);
-
-    if (token && token !== "null" && token !== "") {
-        localStorage.setItem("authToken", token);
-        alert("Registration successful! Redirecting to dashboard...");
+    if (validateToken()) {
+        alert("You are already logged in! Redirecting to dashboard...");
         window.location.href = "/dashboard";
+    } else {
+        //invalid token
+        localStorage.removeItem("authToken");
     }
+
+    document.getElementById("registerForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const name = document.getElementById("name").value;
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const role = document.getElementById("role").value;
+
+        const postData = { name, username, password, role };
+
+        console.log(postData);
+
+            try {
+                // Send the POST request to the backend
+                const response = await axios.post("http://localhost:8083/api/user/register", postData);
+
+                if (response.status === 201) {
+                    const token = response.data;
+                    localStorage.setItem("authToken", token);
+                    alert("Registration successful!");
+                    window.location.href = "/dashboard";
+
+                } else {
+                    document.getElementById("errorMessage").textContent =
+                        "Unexpected error, please try again.";
+                }
+            } catch (error) {
+                if (error.response) {
+                    const errorMessage = error.response.data;
+                    document.getElementById("errorMessage").textContent = errorMessage;
+                } else {
+                    document.getElementById("errorMessage").textContent = "An unknown error occurred.";
+                }
+            }
+        });
 </script>
-
-
-
+</body>
 </html>
