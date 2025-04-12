@@ -1,11 +1,80 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head><title>Your Grades</title></head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Grades</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script type="module" src="/js/axiosConfig.js"></script>
+</head>
 <body>
-<h1>Grades for Student X</h1>
-<ul>
-    <li>Math 101 - A</li>
-    <li>Physics 102 - B+</li>
+<h1 id="gradesHeader">Grades</h1>
+
+<!-- Error message -->
+<div id="errorMessage" style="color: red; display: none;"></div>
+
+<!-- Grades List -->
+<ul id="gradesList">
+    <!-- Dynamic grade list items will be inserted here -->
 </ul>
+
+<script type="module">
+    import axiosInstance, { validateToken, getDecodedToken } from "/js/axiosConfig.js";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        // Validate Token
+        if (!validateToken()) {
+            alert("Session expired or invalid. Redirecting...");
+            window.location.href = "/login";
+            return;
+        }
+
+        // Optionally get user information from token
+        const decodedToken = getDecodedToken();
+        console.log("Decoded Token:", decodedToken);
+
+        if(decodedToken.role !== "STUDENT") {
+            alert("You are not authorized to view this page.");
+            window.location.href = "/dashboard";
+            return;
+        }
+
+        try {
+            // Fetch grades for the authenticated student
+            const response = await axiosInstance.get("http://localhost:8084/api/grades/");
+
+            if (response.status === 200) {
+                // Get the grades data
+                const grades = response.data;
+
+                // Populate the grades list
+                const gradesList = document.getElementById("gradesList");
+                gradesList.innerHTML = ""; // Clear any existing list items
+
+                grades.forEach(grade => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `Course ID: ${grade.courseId} - Grade: ${grade.grade}`;
+                    gradesList.appendChild(listItem);
+                });
+            } else {
+                throw new Error("Failed to fetch grades.");
+            }
+        } catch (error) {
+            console.error("Error fetching grades:", error);
+
+            // Display error message
+            const errorMessageEl = document.getElementById("errorMessage");
+            errorMessageEl.style.display = "block";
+
+            if (error.response && error.response.status === 401) {
+                errorMessageEl.textContent = "Unauthorized. Redirecting to login...";
+                localStorage.removeItem("authToken");
+                setTimeout(() => window.location.href = "/login", 2000);
+            } else {
+                errorMessageEl.textContent = "Could not fetch grades. Please try again later.";
+            }
+        }
+    });
+</script>
 </body>
 </html>

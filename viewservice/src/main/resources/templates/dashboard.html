@@ -1,14 +1,103 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><title>Dashboard</title></head>
+<head>
+  <title>Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+  <script src="/js/axiosConfig.js" type="module"></script>
+</head>
 <body>
-<h1>Welcome to the Dashboard</h1>
-<ul>
-  <li><a href="/courses">View Available Courses</a></li>
+<h1 id="dashboardHeader">Welcome to the Dashboard</h1>
 
-  <li><a href="/enrollments">View Current Enrollments</a></li>
-  <li><a href="/grades">View Grades</a></li>
-  <li><a href="/login">Logout</a></li> <!--should be logout; login for view purposes muna-->
+<div id="content"></div>
+<ul>
+  <li><a href="/" id="logout">Logout</a></li>
 </ul>
+
+<script type="module">
+  import { validateToken, getDecodedToken } from "/js/axiosConfig.js";
+
+  document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        if (validateToken()) {
+          const decodedToken = getDecodedToken();
+
+          if (decodedToken) {
+
+            const username = decodedToken.sub;
+            const role = decodedToken.role;
+            const id = decodedToken.id;
+
+            const contentDiv = document.getElementById("content");
+            if( role === "FACULTY" ) {
+              contentDiv.innerHTML = `
+                    <ul>
+                        <p>Handled Courses</p>
+                        <li><a href="/upload_grades">Upload Grades</a></li>
+                    </ul>
+                `;
+
+
+            } else if ( role === "STUDENT" ) {
+              contentDiv.innerHTML = `
+                    <ul>
+                        <li><a href="/courses">View Available Courses</a></li>
+                        <li><a href="/enrollments">View Current Enrollments</a></li>
+                        <li><a href="/grades">View Grades</a></li>
+                    </ul>
+                `;
+
+
+            } else {
+              alert("You are not authorized to view this page.");
+              window.location.href = "/login";
+            }
+
+            document.getElementById("dashboardHeader").textContent = `Welcome, ${username}!`;
+
+          } else {
+            console.log("No token found.");
+          }
+
+        } else {
+          alert("You are not logged in. Redirecting to login...");
+          window.location.href = "/login";
+
+        }
+
+      } catch (error) {
+        console.error("Error loading dashboard:", error);
+        alert("Failed to load dashboard. Redirecting to login...");
+        window.location.href = "/login";
+      }
+    });
+
+      document.getElementById("logout").addEventListener("click", async (event) => {
+        event.preventDefault();
+
+        try {
+          const authToken = localStorage.getItem("authToken");
+
+          if (!authToken) {
+            // If no token found, simply clear storage just in case
+            localStorage.removeItem("authToken");
+            alert("You are already logged out.");
+            return;
+          } else {
+            localStorage.removeItem("authToken");
+            alert("You have been logged out successfully.")
+            return;
+          }
+
+        } catch (error) {
+          console.error("Logout failed.");
+          alert("Failed to log out. Please try again later.");
+        } finally {
+          localStorage.removeItem("authToken");
+          window.location.href = "/login";
+        }
+      });
+
+</script>
 </body>
 </html>

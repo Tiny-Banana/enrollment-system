@@ -20,12 +20,14 @@ public class UserController {
     }
 
     // Register a new user
+    @CrossOrigin
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         return userService.register(user);
     }
 
     // Login
+    @CrossOrigin
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         return userService.login(request);
@@ -38,7 +40,7 @@ public class UserController {
         return userService.logout(token);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/dashboard/{id}")
     @PreAuthorize("#id == principal.id")
     public ResponseEntity<?> getUser(@PathVariable int id) {
         return userService.findUser(id);

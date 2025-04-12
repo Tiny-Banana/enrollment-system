@@ -11,6 +11,7 @@
         <option value="$PROJECT_DIR$/upload-grade-service/pom.xml" />
         <option value="$PROJECT_DIR$/frontend-service/pom.xml" />
         <option value="$PROJECT_DIR$/viewservice/pom.xml" />
+        <option value="$PROJECT_DIR$/view-grade-service/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

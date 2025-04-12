@@ -1,39 +1,109 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
-  <title>Available Courses</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Courses</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+    <script type="module" src="/js/axiosConfig.js"></script>
 </head>
 <body>
 <h1>Available Courses</h1>
 
-<div th:if="${errorMessage}" class="alert alert-danger">
-  <p th:text="${errorMessage}"></p>
-</div>
+<a href="/dashboard">Back to Dashboard</a>
 
- <table border="1">
-  <thead>
-  <tr>
-    <th>Course ID</th>
-    <th>Course Name</th>
-    <th>Course Instructor</th>
-    <th>Actions</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr th:each="course : ${courses}">
-    <td th:text="${course.id}"></td>
-    <td th:text="${course.name}"></td>
-    <td th:text="${course.instructor}"></td>
-    <td>
-      <!-- Link for enrollment -->
-      <a href="enroll">Enroll</a>
-    </td>
-  </tr>
-  </tbody>
+<!-- Placeholder for error message -->
+<div id="errorMessage" style="color: red; display: none;"></div>
+
+<!-- Courses Table -->
+<table border="1">
+    <thead>
+    <tr>
+        <th>Course Name</th>
+        <th>Course Instructor</th>
+        <th>Timeslot</th>
+        <th>Enrolled Students</th>
+        <th>Max Students</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody id="coursesTableBody">
+    <!-- Dynamic rows will be inserted here -->
+    </tbody>
 </table>
 
+<script type="module">
+    import axiosInstance, { validateToken, getDecodedToken } from "/js/axiosConfig.js";
 
+    document.addEventListener("DOMContentLoaded", async () => {
+        // Validate Token
+        if (!validateToken()) {
+            alert("Session expired or invalid. Redirecting...");
+            window.location.href = "/login";
+            return;
+        }
 
+        const decodedToken = getDecodedToken();
+        console.log("Decoded Token:", decodedToken);
+
+        if(decodedToken.role !== "STUDENT") {
+            alert("You are not authorized to view this page.");
+            window.location.href = "/dashboard";
+            return;
+        }
+
+        try {
+            // Fetch courses using Axios
+            const response = await axiosInstance.get("http://localhost:8081/api/courses/available");
+
+            if (response.status === 200) {
+                // Get the courses data
+                const courses = response.data;
+
+                console.log(courses);
+
+                // Populate the courses table
+                const tableBody = document.getElementById("coursesTableBody");
+                tableBody.innerHTML = ""; // Clear any existing rows
+
+                courses.forEach(course => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+              <td>${course.name}</td>
+              <td>${course.instructor}</td>
+              <td>${course.timeslot}</td>
+              <td>${course.enrolledStudents}</td>
+              <td>${course.maxStudents}</td>
+              <td><a href="/enroll">Enroll</a></td>
+            `;
+                    tableBody.appendChild(row);
+                });
+            } else {
+                throw new Error("Failed to fetch courses. Please try again later.");
+            }
+        } catch (error) {
+            console.error("Error fetching courses:", error);
+
+            // Display error message
+            const errorMessage = document.getElementById("errorMessage");
+            errorMessage.style.display = "block";
+
+            if (error.response) {
+                if (error.response.status === 403) {
+                    // Forbidden
+                    errorMessage.textContent = "You are not authorized to access this resource.";
+                } else if (error.response.status === 500) {
+                    // Internal server error
+                    errorMessage.textContent = "Server error occurred. Please try again later.";
+                } else {
+                    errorMessage.textContent = "An error occurred while fetching courses.";
+                }
+            } else {
+                errorMessage.textContent = "Failed to connect to the server. Please try again.";
+            }
+        }
+    });
+</script>
 </body>
 </html>
-
