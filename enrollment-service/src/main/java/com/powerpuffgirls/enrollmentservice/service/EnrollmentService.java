@@ -1,6 +1,7 @@
 package com.powerpuffgirls.enrollmentservice.service;
 
 import com.powerpuffgirls.common.model.Course;
+import com.powerpuffgirls.enrollmentservice.model.CourseWithEnrollmentStatusDTO;
 import com.powerpuffgirls.enrollmentservice.model.Enrollment;
 import com.powerpuffgirls.enrollmentservice.model.EnrollmentRequest;
 import com.powerpuffgirls.enrollmentservice.repository.CourseRepository;
@@ -74,6 +75,37 @@ public class EnrollmentService {
 //        enrollmentPublisher.publishCourseEnrollment(enrollmentRequest);
 
         return ResponseEntity.status(HttpStatus.OK).body("Student enrolled.");
+    }
+
+    public ResponseEntity<?> getEnrolledCourses(String token, int requestedStudentId) {
+        try {
+            // Extract the student ID from the JWT token
+            int studentId = jwtUtil.getId(token);
+
+            System.out.println("Extracted studentId: " + studentId);
+            System.out.println("Requested studentId: " + requestedStudentId);
+
+            // Verify that the requestor is trying to access their own grades
+            if (studentId != requestedStudentId) {
+                return ResponseEntity.status(403).body("Access denied: Cannot view grades for other students.");
+            }
+
+            System.out.println("Matching student ids");
+
+            // Fetch courses for the student from the repository
+
+            List<CourseWithEnrollmentStatusDTO> courses = null;
+            try {
+                courses = courseRepository.findCoursesWithEnrollmentStatus(studentId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            // Return the grades if found, or 204 No Content if no grades
+            return courses.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(courses);
+        } catch (Exception e) {
+            // Handle exceptions like invalid or expired tokens
+            return ResponseEntity.status(401).body("Invalid or expired token.");
+        }
     }
 
 //    @RabbitListener(queues = "userExistenceResultQueue")

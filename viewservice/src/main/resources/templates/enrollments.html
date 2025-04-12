@@ -1,11 +1,101 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Enrollments</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Courses</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+    <script type="module" src="/js/axiosConfig.js"></script>
 </head>
 <body>
-<h2>Enrollments for Student X</h2>
-<ul id="enrollmentList"></ul>
+<h1>Enrolled Courses</h1>
+
+<a href="/dashboard">Back to Dashboard</a>
+
+<!-- Placeholder for error message -->
+<div id="errorMessage" style="color: red; display: none;"></div>
+
+<!-- Courses Table -->
+<table border="1">
+    <thead>
+    <tr>
+        <th>Course Name</th>
+        <th>Course Instructor</th>
+        <th>Timeslot</th>
+        <th>Enrolled Students</th>
+        <th>Max Students</th>
+    </tr>
+    </thead>
+    <tbody id="coursesTableBody">
+    <!-- Dynamic rows will be inserted here -->
+    <p>Loading...</p>
+    <!-- TODO: Do loading -->
+    </tbody>
+</table>
+
+<script type="module">
+    import axiosInstance, { validateToken, getDecodedToken } from "/js/axiosConfig.js";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        // Validate Token
+        if (!validateToken()) {
+            alert("Session expired or invalid. Redirecting...");
+            window.location.href = "/login";
+            return;
+        }
+
+        const decodedToken = getDecodedToken();
+        console.log("Decoded Token:", decodedToken);
+
+        if (decodedToken.role !== "STUDENT") {
+            alert("You are not authorized to view this page.");
+            window.location.href = "/dashboard";
+            return;
+        }
+
+        try {
+            // Fetch courses using Axios
+            const response = await axiosInstance.post(
+                "http://localhost:8082/api/enroll/enrolled",
+                { studentId: decodedToken.id }
+            );
+
+            if (response.status === 200) {
+                const courses = response.data;
+                console.log(courses);
+
+                // Populate the courses table
+                const tableBody = document.getElementById("coursesTableBody");
+                tableBody.innerHTML = ""; // Clear any existing rows
+
+                courses.forEach(course => {
+                    if (course.enrolled) {
+                        const row = document.createElement("tr");
+
+                        row.innerHTML = `
+                            <td>${course.name}</td>
+                            <td>${course.instructor}</td>
+                            <td>${course.timeslot}</td>
+                            <td>${course.enrolledStudents}</td>
+                            <td>${course.maxStudents}</td>
+                        `;
+
+                        // Append the row to the table
+                        tableBody.appendChild(row);
+                    }
+                });
+            } else {
+                throw new Error("Failed to fetch courses.");
+            }
+        } catch (error) {
+            console.error("Error fetching courses:", error);
+            const errorMessageDiv = document.getElementById("errorMessage");
+            errorMessageDiv.textContent = "Failed to load courses. Please try again later.";
+            errorMessageDiv.style.display = "block";
+        }
+    });
+</script>
 
 </body>
 </html>

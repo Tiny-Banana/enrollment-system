@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/enroll")
@@ -30,5 +31,30 @@ public class EnrollmentController {
                                                 @RequestHeader("Authorization") String authorizationHeader
     ) {
         return enrollmentService.enrollStudentInCourse(enrollmentRequest, authorizationHeader);
+    }
+
+    @CrossOrigin
+    @PostMapping("/enrolled")
+    public ResponseEntity<?> getEnrolledCourses(@RequestHeader("Authorization") String token,
+                                                @RequestBody Map<String, Integer> requestBody) {
+
+        System.out.println("Request Body: " + requestBody);
+        System.out.println("Token: " + token);
+
+        try {
+            // Extract student ID from the token
+            String jwt = token.replace("Bearer ", "");
+
+            Integer requestedStudentId = requestBody.get("studentId");
+
+            System.out.println("Returned" + enrollmentService.getEnrolledCourses(jwt, requestedStudentId));
+            // Delegate fetching grades to the service
+            return enrollmentService.getEnrolledCourses(jwt, requestedStudentId);
+
+        } catch (Exception e) {
+            // Handle invalid or expired token
+            return ResponseEntity.status(401).body("Unauthorized: Invalid or expired token.");
+        }
+
     }
 }
