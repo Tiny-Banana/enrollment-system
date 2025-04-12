@@ -40,7 +40,7 @@ public class ViewController {
     @GetMapping("/grades")
     public String viewGrades() { return "grades"; }
 
-    @GetMapping("/faculty/grades")
+    @GetMapping("/faculty/viewfac")
     public String facultyViewGrades() {
         return "faculty_grades";
     }

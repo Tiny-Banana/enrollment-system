@@ -8,6 +8,8 @@
 </head>
 <body>
 <h1>Upload Grades</h1>
+<a href="/dashboard">Back to Dashboard</a>
+
 <form id="uploadGradeForm">
     <label for="courseId">Course:</label>
     <select id="courseId" name="courseId" required>
@@ -103,6 +105,8 @@
         const postData = { facultyId, studentId, courseId, grade };
 
         try {
+
+            console.log('trying', postData);
             const response = await axiosInstance.post("http://localhost:8085/api/grades/upload", postData);
 
             if (response.status === 200 || response.status === 201) {

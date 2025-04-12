@@ -67,6 +67,8 @@ public class CourseService {
             // Extract the student ID from the JWT token
             int facultyId = jwtUtil.getId(token);
 
+            System.out.println("From getHandledCourses");
+
             System.out.println("Extracted facultyId: " + facultyId);
             System.out.println("Requested facultyId: " + requestedFacultyId);
 

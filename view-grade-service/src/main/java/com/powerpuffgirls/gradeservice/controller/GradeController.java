@@ -39,4 +39,30 @@ public class GradeController {
             return ResponseEntity.status(401).body("Unauthorized: Invalid or expired token.");
         }
     }
+
+    @PostMapping("/viewfac")
+    public ResponseEntity<?> getGradesForFaculty
+            (@RequestHeader("Authorization") String token,
+                                                    @RequestBody Map<String, Integer> requestBody){
+
+        System.out.println("From viewFac, getGradesForFaculty");
+
+        System.out.println("Request Body: " + requestBody);
+        System.out.println("Token: " + token);
+
+        try {
+            // Extract student ID from the token
+            String jwt = token.replace("Bearer ", "");
+
+            Integer requestedFacultyId = requestBody.get("facultyId");
+
+            System.out.println("Returned" + gradeService.getGradesForFaculty(jwt, requestedFacultyId));
+            // Delegate fetching grades to the service
+            return gradeService.getGradesForFaculty(jwt, requestedFacultyId);
+
+        } catch (Exception e) {
+            // Handle invalid or expired token
+            return ResponseEntity.status(401).body("Unauthorized: Invalid or expired token.");
+        }
+    }
 }
