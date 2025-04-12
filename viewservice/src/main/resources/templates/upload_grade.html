@@ -1,13 +1,127 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><title>Upload Grades</title></head>
+<head>
+    <title>Upload Grade</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+    <script src="/js/axiosConfig.js" type="module"></script>
+</head>
 <body>
-<h1>Upload Grade for Student X in Course X</h1>
-<form method="post" action="/api/grades/upload">
-    <label>Student ID:</label><input type="number" name="studentId"/><br/>
-    <label>Course ID:</label><input type="number" name="courseId"/><br/>
-    <label>Grade:</label><input type="text" name="grade"/><br/>
-    <button type="submit">Upload</button>
+<h1>Upload Grades</h1>
+<form id="uploadGradeForm">
+    <label for="courseId">Course:</label>
+    <select id="courseId" name="courseId" required>
+        <option value="" disabled selected>Select a course</option>
+    </select><br/>
+
+    <label for="studentId">Student:</label>
+    <select id="studentId" name="studentId" required>
+        <option value="" disabled selected>Select a student</option>
+    </select><br/>
+
+    <label for="grade">Grade:</label>
+    <input type="text" id="grade" name="grade" required><br/>
+
+    <p id="errorMessage" style="color: red;"></p> <!-- Error placeholder -->
+
+    <button type="submit">Upload Grade</button>
 </form>
+
+<script type="module">
+    import axiosInstance, { validateToken, getDecodedToken } from "/js/axiosConfig.js";
+
+    window.addEventListener("DOMContentLoaded", async () => {
+        // Validate token and user role
+        if (!validateToken()) {
+            alert("You are not logged in! Redirecting to login...");
+            window.location.href = "/login";
+            return;
+        }
+
+        const decodedToken = getDecodedToken();
+        if (!decodedToken || decodedToken.role !== 'FACULTY') {
+            alert("You are not authorized to access this page!");
+            window.location.href = "/dashboard";
+            return;
+        }
+
+        const facultyId = decodedToken.id;
+
+        try {
+            const response = await axiosInstance.post("http://localhost:8081/api/courses/handled", {
+                facultyId: facultyId,
+            });
+
+            const courses = response.data;
+
+            const courseDropdown = document.getElementById("courseId");
+            courses.forEach(course => {
+                const option = document.createElement("option");
+                option.value = course.id;
+                option.textContent = course.name; // Course name
+                courseDropdown.appendChild(option);
+            });
+
+            // Event listener for course selection to fetch students
+            courseDropdown.addEventListener("change", async (event) => {
+                const selectedCourseId = event.target.value;
+
+                // Fetch students enrolled in selected course
+                const studentsResponse = await axiosInstance.post("http://localhost:8082/api/enroll/students", {
+                    courseId: selectedCourseId,
+                });
+                const students = studentsResponse.data;
+
+                console.log('here is students', students);
+
+                const studentDropdown = document.getElementById("studentId");
+                studentDropdown.innerHTML = '<option value="" disabled selected>Select a student</option>'; // Reset dropdown
+
+                students.forEach(student => {
+                    const option = document.createElement("option");
+                    option.value = student.id;
+                    option.textContent = `${student.name} (ID: ${student.id})`;
+                    studentDropdown.appendChild(option);
+                });
+            });
+        } catch (error) {
+            document.getElementById("errorMessage").textContent =
+                "Failed to load courses or students. Please try again.";
+        }
+    });
+
+    // Handle form submission
+    document.getElementById("uploadGradeForm").addEventListener("submit", async (event) => {
+        event.preventDefault(); // Prevent default form submission behavior
+
+        // Get form values
+        const facultyId = decodedToken.id;
+        const courseId = document.getElementById("courseId").value;
+        const studentId = document.getElementById("studentId").value;
+        const grade = document.getElementById("grade").value;
+
+        const postData = { facultyId, studentId, courseId, grade };
+
+        try {
+            const response = await axiosInstance.post("http://localhost:8085/api/grades/upload", postData);
+
+            if (response.status === 200 || response.status === 201) {
+                alert("Grade uploaded successfully!");
+                document.getElementById("uploadGradeForm").reset(); // Reset form after success
+            } else {
+                document.getElementById("errorMessage").textContent =
+                    "Unexpected error occurred. Please try again.";
+            }
+        } catch (error) {
+            if (error.response) {
+                const errorMessage = error.response.data || "Unable to upload grade.";
+                document.getElementById("errorMessage").textContent = errorMessage;
+            } else {
+                document.getElementById("errorMessage").textContent =
+                    "An unknown error occurred while uploading the grade.";
+            }
+        }
+    });
+</script>
 </body>
 </html>

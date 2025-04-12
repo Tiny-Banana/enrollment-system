@@ -13,6 +13,9 @@ public class Course {
     @Column(name = "id")
     private int id;
 
+    @Column(name = "facultyId")
+    private int facultyId;
+
     @Column(nullable = false)
     private String name;
 

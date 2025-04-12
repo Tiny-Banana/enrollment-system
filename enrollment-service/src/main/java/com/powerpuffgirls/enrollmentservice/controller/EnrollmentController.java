@@ -57,4 +57,32 @@ public class EnrollmentController {
         }
 
     }
+
+    @CrossOrigin
+    @PostMapping("/students")
+    public ResponseEntity<?> getStudentsInCourse(@RequestBody Map<String, Integer> requestBody) {
+
+        System.out.println("Request Body: " + requestBody);
+
+        try {
+
+            Integer courseId = requestBody.get("courseId");
+
+            try {
+                System.out.println("Returned" + enrollmentService.getStudentsForCourse(courseId));
+                // Delegate fetching grades to the service
+                enrollmentService.getStudentsForCourse(courseId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return enrollmentService.getStudentsForCourse(courseId);
+
+
+        } catch (Exception e) {
+            // Handle invalid or expired token
+            return ResponseEntity.status(401).body("Unauthorized: Invalid or expired token.");
+        }
+
+    }
 }

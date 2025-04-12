@@ -4,6 +4,7 @@ import com.powerpuffgirls.common.model.Course;
 import com.powerpuffgirls.enrollmentservice.model.CourseWithEnrollmentStatusDTO;
 import com.powerpuffgirls.enrollmentservice.model.Enrollment;
 import com.powerpuffgirls.enrollmentservice.model.EnrollmentRequest;
+import com.powerpuffgirls.enrollmentservice.model.Student;
 import com.powerpuffgirls.enrollmentservice.repository.CourseRepository;
 import com.powerpuffgirls.enrollmentservice.repository.EnrollmentRepository;
 import com.powerpuffgirls.enrollmentservice.repository.UserRepository;
@@ -35,6 +36,18 @@ public class EnrollmentService {
 
     public List<Enrollment> getAllEnrollmentsForCourse(int courseId) {
         return enrollmentRepository.findByCourseId(courseId);
+    }
+
+    public ResponseEntity<?> getStudentsForCourse(int courseId) {
+        List<Student> students = enrollmentRepository.findStudentsByCourseId(courseId);
+
+        System.out.println("The students for this course are:" + students);
+        if (students.isEmpty()) {
+            // Respond with 204 No Content
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(students);
     }
 
     public ResponseEntity<String> enrollStudentInCourse(EnrollmentRequest enrollmentRequest, String authorizationHeader) {

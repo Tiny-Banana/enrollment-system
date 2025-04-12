@@ -4,7 +4,7 @@
   <title>Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
-  <script src="/js/axiosConfig.js" type="module"></script>
+  <script type="module" src="/js/axiosConfig.js"></script>
 </head>
 <body>
 <h1 id="dashboardHeader">Welcome to the Dashboard</h1>
@@ -15,7 +15,7 @@
 </ul>
 
 <script type="module">
-  import { validateToken, getDecodedToken } from "/js/axiosConfig.js";
+  import axiosInstance, { validateToken, getDecodedToken } from "/js/axiosConfig.js";
 
   document.addEventListener("DOMContentLoaded", async () => {
       try {
@@ -30,11 +30,57 @@
             const contentDiv = document.getElementById("content");
             if( role === "FACULTY" ) {
               contentDiv.innerHTML = `
-                    <ul>
-                        <p>Handled Courses</p>
-                        <li><a href="/upload_grades">Upload Grades</a></li>
-                    </ul>
-                `;
+                <h2>Handled Courses</h2>
+                <table border="1" id="handledCoursesTable">
+                  <thead>
+                    <tr>
+                      <th>Course Name</th>
+                      <th>Description</th>
+                      <th>Timeslot</th>
+                      <th>Enrolled Students</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Dynamic rows will be inserted here -->
+                  </tbody>
+                </table>
+                <ul>
+                  <li><a href="/faculty/upload">Upload Grades</a></li>
+                </ul>
+              `;
+
+              // Fetch and display handled courses for a faculty
+              try {
+                const response = await axiosInstance.post("http://localhost:8081/api/courses/handled", {
+                  facultyId: decodedToken.id,
+                });
+
+                if (response.status === 200) {
+                  const courses = response.data;
+
+                  const handledCoursesTableBody = document.querySelector("#handledCoursesTable tbody");
+                  handledCoursesTableBody.innerHTML = ""; // Clear rows before inserting
+
+                  // Populate the handled courses table dynamically
+                  courses.forEach(course => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                      <td>${course.name}</td>
+                      <td>${course.timeslot}</td>
+                      <td>${course.enrolledStudents}</td>
+                      <td>${course.maxStudents}</td>
+                    `;
+                    handledCoursesTableBody.appendChild(row);
+                  });
+                } else {
+                  console.error("Failed to fetch handled courses. Empty list returned or an error occurred.");
+                }
+              } catch (error) {
+                console.error("Error fetching handled courses:", error);
+                alert("Failed to load handled courses. Please try again later.");
+              }
+
+
 
 
             } else if ( role === "STUDENT" ) {

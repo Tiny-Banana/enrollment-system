@@ -28,7 +28,7 @@ public class UploadGradeService {
         String role = jwtUtil.getRole(token);
         int currentUserId = jwtUtil.getId(token);
 
-        if (!role.equals("faculty") && currentUserId != gradeRequest.getFacultyId()) {
+        if (!role.equals("FACULTY") && currentUserId != gradeRequest.getFacultyId()) {
             return ResponseEntity.status(403).body("Access denied: You do not have permission to upload grades.");
         }
 

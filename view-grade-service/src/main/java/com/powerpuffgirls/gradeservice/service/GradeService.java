@@ -36,18 +36,14 @@ public class GradeService {
 
             System.out.println("Matching student ids");
 
-            // Fetch grades for the student from the repository
-
             List<GradeCourseDTO> grades = null;
             try {
                 grades = gradeRepository.findGradeAndCourseNameByStudentId(studentId);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            // Return the grades if found, or 204 No Content if no grades
             return grades.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(grades);
         } catch (Exception e) {
-            // Handle exceptions like invalid or expired tokens
             return ResponseEntity.status(401).body("Invalid or expired token.");
         }
     }

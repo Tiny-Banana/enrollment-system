@@ -62,5 +62,35 @@ public class CourseService {
         }
     }
 
+    public ResponseEntity<?> getHandledCourses(String token, int requestedFacultyId) {
+        try {
+            // Extract the student ID from the JWT token
+            int facultyId = jwtUtil.getId(token);
+
+            System.out.println("Extracted facultyId: " + facultyId);
+            System.out.println("Requested facultyId: " + requestedFacultyId);
+
+            // Verify that the requestor is trying to access their own grades
+            if (facultyId != requestedFacultyId) {
+                return ResponseEntity.status(403).body("Access denied: Cannot view grades for other students.");
+            }
+
+            System.out.println("Matching faculty ids");
+
+            // Fetch courses for the faculty from the repository
+            List<Course> courses = null;
+            try {
+                courses = courseRepository.findCourseByFacultyId(facultyId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            // Return the grades if found, or 204 No Content if no grades
+            return courses.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(courses);
+        } catch (Exception e) {
+            // Handle exceptions like invalid or expired tokens
+            return ResponseEntity.status(401).body("Invalid or expired token.");
+        }
+    }
+
 }
 

@@ -57,4 +57,29 @@ public class CourseController {
         }
 
     }
+
+    @CrossOrigin
+    @PostMapping("/handled")
+    public ResponseEntity<?> getHandledCourses(@RequestHeader("Authorization") String token,
+                                                                     @RequestBody Map<String, Integer> requestBody) {
+
+        System.out.println("Request Body: " + requestBody);
+        System.out.println("Token: " + token);
+
+        try {
+            // Extract student ID from the token
+            String jwt = token.replace("Bearer ", "");
+
+            Integer requestedFacultyId = requestBody.get("facultyId");
+
+            System.out.println("Returned" + courseService.getHandledCourses(jwt, requestedFacultyId));
+            // Delegate fetching grades to the service
+            return courseService.getHandledCourses(jwt, requestedFacultyId);
+
+        } catch (Exception e) {
+            // Handle invalid or expired token
+            return ResponseEntity.status(401).body("Unauthorized: Invalid or expired token.");
+        }
+
+    }
 }
