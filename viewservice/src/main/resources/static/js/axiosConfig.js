@@ -66,19 +66,6 @@ axiosInstance.interceptors.request.use((config) => {
     return Promise.reject(error);
 });
 
-// Intercept responses to handle global errors
-axiosInstance.interceptors.response.use(
-    (response) => response, // Successful responses are forwarded
-    (error) => {
-        if (error.response && error.response.status === 401) {
-            alert("Session expired! Redirecting to login...");
-            localStorage.removeItem("authToken");
-            window.location.href = "/login";
-        }
-        return Promise.reject(error);
-    }
-);
-
 // Export the configured Axios instance
 export { validateToken, getDecodedToken }; // Named exports
 export default axiosInstance;

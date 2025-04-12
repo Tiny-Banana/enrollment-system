@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Grades</title>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
     <script type="module" src="/js/axiosConfig.js"></script>
 </head>
 <body>
@@ -13,66 +14,97 @@
 <!-- Error message -->
 <div id="errorMessage" style="color: red; display: none;"></div>
 
-<!-- Grades List -->
-<ul id="gradesList">
-    <!-- Dynamic grade list items will be inserted here -->
-</ul>
+<!-- Grades Table -->
+<table id="gradesTable" border="1" style="width: 50%; text-align: center; margin-top: 20px; border-collapse: collapse; display: none;">
+    <thead>
+    <tr>
+        <th>Course Name</th>
+        <th>Grade</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Dynamic grade rows will be inserted here -->
+    </tbody>
+</table>
 
 <script type="module">
     import axiosInstance, { validateToken, getDecodedToken } from "/js/axiosConfig.js";
 
     document.addEventListener("DOMContentLoaded", async () => {
-        // Validate Token
-        if (!validateToken()) {
-            alert("Session expired or invalid. Redirecting...");
-            window.location.href = "/login";
-            return;
-        }
-
-        // Optionally get user information from token
-        const decodedToken = getDecodedToken();
-        console.log("Decoded Token:", decodedToken);
-
-        if(decodedToken.role !== "STUDENT") {
-            alert("You are not authorized to view this page.");
-            window.location.href = "/dashboard";
-            return;
-        }
+        // Validate the token
+        console.log(localStorage.getItem("authToken"));
 
         try {
-            // Fetch grades for the authenticated student
-            const response = await axiosInstance.get("http://localhost:8084/api/grades/");
+            if (validateToken()) {
+                // Decode the JWT to ensure the user is a STUDENT
+                const decodedToken = getDecodedToken();
 
-            if (response.status === 200) {
-                // Get the grades data
-                const grades = response.data;
+                if (decodedToken) {
+                    if (decodedToken.role === "STUDENT") {
+                        const id = decodedToken.id;
 
-                // Populate the grades list
-                const gradesList = document.getElementById("gradesList");
-                gradesList.innerHTML = ""; // Clear any existing list items
+                        try {
+                            // Fetch grades from the backend
+                            const response = await axiosInstance.post("http://localhost:8084/api/grades/view", {
+                                studentId: id,
+                            });
 
-                grades.forEach(grade => {
-                    const listItem = document.createElement("li");
-                    listItem.textContent = `Course ID: ${grade.courseId} - Grade: ${grade.grade}`;
-                    gradesList.appendChild(listItem);
-                });
-            } else {
-                throw new Error("Failed to fetch grades.");
+                            document.getElementById("gradesHeader").textContent = "Grades for " + decodedToken.sub;
+
+                            // Display grades if the response is successful
+                            if (response.status === 200) {
+                                const grades = response.data;
+                                const gradesTable = document.getElementById("gradesTable");
+                                const tableBody = gradesTable.querySelector("tbody");
+
+                                console.log(grades);
+
+                                if (grades.length === 0) {
+                                    tableBody.innerHTML = `<tr><td colspan="2">No grades available.</td></tr>`;
+                                } else {
+                                    gradesTable.style.display = "table"; // Show table
+                                    tableBody.innerHTML = ""; // Clear existing rows
+                                    grades.forEach((grade) => {
+                                        const row = document.createElement("tr");
+                                        const courseCell = document.createElement("td");
+                                        const gradeCell = document.createElement("td");
+
+                                        courseCell.textContent = grade.courseName;
+                                        gradeCell.textContent = grade.grade;
+
+                                        row.appendChild(courseCell);
+                                        row.appendChild(gradeCell);
+                                        tableBody.appendChild(row);
+                                    });
+                                }
+                            } else if (response.status === 204) {
+                                alert("No grades available.");
+                            }
+                        } catch (error) {
+                            console.error("Error fetching grades:", error);
+
+                            const errorMessageEl = document.getElementById("errorMessage");
+                            errorMessageEl.style.display = "block";
+
+                            if (error.response && error.response.status === 401) {
+                                errorMessageEl.textContent = "Unauthorized to view here. Redirecting to dashboard...";
+                            } else {
+                                errorMessageEl.textContent = "An error occurred while fetching grades. Please try again later.";
+                            }
+                        }
+                    } else {
+                        alert("You are not authorized to view grades.");
+                        window.location.href = "/dashboard";
+                        return;
+                    }
+                } else {
+                    console.log("Invalid token.");
+                    window.location.href = "/login";
+                }
             }
         } catch (error) {
-            console.error("Error fetching grades:", error);
-
-            // Display error message
-            const errorMessageEl = document.getElementById("errorMessage");
-            errorMessageEl.style.display = "block";
-
-            if (error.response && error.response.status === 401) {
-                errorMessageEl.textContent = "Unauthorized. Redirecting to login...";
-                localStorage.removeItem("authToken");
-                setTimeout(() => window.location.href = "/login", 2000);
-            } else {
-                errorMessageEl.textContent = "Could not fetch grades. Please try again later.";
-            }
+            console.error("Error loading grades:", error);
+            alert("Failed to load grades. Redirecting...");
         }
     });
 </script>

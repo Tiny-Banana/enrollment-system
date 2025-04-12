@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/grades")
 public class GradeController {
@@ -15,9 +17,26 @@ public class GradeController {
         this.gradeService = gradeService;
     }
 
-    @GetMapping("/{studentId}")
-    public ResponseEntity<?> getAllGradesForStudent(@PathVariable int studentId,
-                                                    @RequestHeader("Authorization") String authorizationHeader) {
-        return gradeService.getGradesByStudentId(studentId, authorizationHeader);
+    @PostMapping("/view")
+    public ResponseEntity<?> getAllGradesForStudent(@RequestHeader("Authorization") String token,
+                                                    @RequestBody Map<String, Integer> requestBody){
+
+        System.out.println("Request Body: " + requestBody);
+        System.out.println("Token: " + token);
+
+        try {
+            // Extract student ID from the token
+            String jwt = token.replace("Bearer ", "");
+
+            Integer requestedStudentId = requestBody.get("studentId");
+
+            System.out.println("Returned" + gradeService.getGradesByStudentId(jwt, requestedStudentId));
+            // Delegate fetching grades to the service
+            return gradeService.getGradesByStudentId(jwt, requestedStudentId);
+
+        } catch (Exception e) {
+            // Handle invalid or expired token
+            return ResponseEntity.status(401).body("Unauthorized: Invalid or expired token.");
+        }
     }
 }

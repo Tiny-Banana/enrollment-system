@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/enrollment-system.iml" filepath="$PROJECT_DIR$/.idea/enrollment-system.iml" />
+      <module fileurl="file://$PROJECT_DIR$/view-grade-service/grade-service.iml" filepath="$PROJECT_DIR$/view-grade-service/grade-service.iml" />
     </modules>
   </component>
 </project>
