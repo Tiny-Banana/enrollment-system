@@ -32,15 +32,16 @@
 <script type="module">
     import axiosInstance, { validateToken, getDecodedToken } from "/js/axiosConfig.js";
 
+    let decodedToken; // Declare it in outer scope
+
     window.addEventListener("DOMContentLoaded", async () => {
-        // Validate token and user role
         if (!validateToken()) {
             alert("You are not logged in! Redirecting to login...");
             window.location.href = "/login";
             return;
         }
 
-        const decodedToken = getDecodedToken();
+        decodedToken = getDecodedToken(); // Assign here
         if (!decodedToken || decodedToken.role !== 'FACULTY') {
             alert("You are not authorized to access this page!");
             window.location.href = "/dashboard";
@@ -55,29 +56,26 @@
             });
 
             const courses = response.data;
-
             const courseDropdown = document.getElementById("courseId");
+
             courses.forEach(course => {
                 const option = document.createElement("option");
                 option.value = course.id;
-                option.textContent = course.name; // Course name
+                option.textContent = course.name;
                 courseDropdown.appendChild(option);
             });
 
-            // Event listener for course selection to fetch students
+            // Populate students when course is selected
             courseDropdown.addEventListener("change", async (event) => {
                 const selectedCourseId = event.target.value;
 
-                // Fetch students enrolled in selected course
                 const studentsResponse = await axiosInstance.post("http://localhost:8082/api/enroll/students", {
                     courseId: selectedCourseId,
                 });
+
                 const students = studentsResponse.data;
-
-                console.log('here is students', students);
-
                 const studentDropdown = document.getElementById("studentId");
-                studentDropdown.innerHTML = '<option value="" disabled selected>Select a student</option>'; // Reset dropdown
+                studentDropdown.innerHTML = '<option value="" disabled selected>Select a student</option>';
 
                 students.forEach(student => {
                     const option = document.createElement("option");
@@ -86,17 +84,16 @@
                     studentDropdown.appendChild(option);
                 });
             });
+
         } catch (error) {
             document.getElementById("errorMessage").textContent =
                 "Failed to load courses or students. Please try again.";
         }
     });
 
-    // Handle form submission
     document.getElementById("uploadGradeForm").addEventListener("submit", async (event) => {
-        event.preventDefault(); // Prevent default form submission behavior
+        event.preventDefault();
 
-        // Get form values
         const facultyId = decodedToken.id;
         const courseId = document.getElementById("courseId").value;
         const studentId = document.getElementById("studentId").value;
@@ -105,13 +102,11 @@
         const postData = { facultyId, studentId, courseId, grade };
 
         try {
-
-            console.log('trying', postData);
             const response = await axiosInstance.post("http://localhost:8085/api/grades/upload", postData);
 
             if (response.status === 200 || response.status === 201) {
                 alert("Grade uploaded successfully!");
-                document.getElementById("uploadGradeForm").reset(); // Reset form after success
+                document.getElementById("uploadGradeForm").reset();
             } else {
                 document.getElementById("errorMessage").textContent =
                     "Unexpected error occurred. Please try again.";
