@@ -28,6 +28,8 @@ public class UploadGradeService {
         String role = jwtUtil.getRole(token);
         int currentUserId = jwtUtil.getId(token);
 
+        System.out.println("TOken is " + role + " " + currentUserId);
+
         if (!role.equals("FACULTY") && currentUserId != gradeRequest.getFacultyId()) {
             return ResponseEntity.status(403).body("Access denied: You do not have permission to upload grades.");
         }
@@ -37,7 +39,10 @@ public class UploadGradeService {
                 gradeRequest.getStudentId(), gradeRequest.getCourseId());
 
         if (existingGrade.isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Grade already uploaded for this student in this course.");
+            Grade gradeToUpdate = existingGrade.get();
+            gradeToUpdate.setGrade(gradeRequest.getGrade());
+            gradeRepository.save(gradeToUpdate);
+            return ResponseEntity.status(HttpStatus.OK).body("Grade updated successfully.");
         }
 
         Grade grade = new Grade();
