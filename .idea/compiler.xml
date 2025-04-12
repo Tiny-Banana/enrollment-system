@@ -8,21 +8,22 @@
         <outputRelativeToContentRoot value="true" />
         <module name="course-service" />
         <module name="auth-service" />
+        <module name="common" />
         <module name="viewservice" />
-        <module name="grade-service" />
         <module name="view-service" />
         <module name="upload-grade-service" />
+        <module name="grade-service" />
         <module name="enrollment-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="frontend-service" target="24" />
-      <module name="view-grade-service" target="24" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="auth-service" options="-parameters" />
+      <module name="common" options="-parameters" />
       <module name="course-service" options="-parameters" />
       <module name="enrollment-service" options="-parameters" />
       <module name="grade-service" options="-parameters" />
