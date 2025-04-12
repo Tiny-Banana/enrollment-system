@@ -1,8 +1,11 @@
 package com.powerpuffgirls.enrollmentservice.service;
 
+import com.powerpuffgirls.common.model.Course;
 import com.powerpuffgirls.enrollmentservice.model.Enrollment;
 import com.powerpuffgirls.enrollmentservice.model.EnrollmentRequest;
+import com.powerpuffgirls.enrollmentservice.repository.CourseRepository;
 import com.powerpuffgirls.enrollmentservice.repository.EnrollmentRepository;
+import com.powerpuffgirls.enrollmentservice.repository.UserRepository;
 import com.powerpuffgirls.enrollmentservice.security.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,11 +17,18 @@ import java.util.List;
 @Service
 public class EnrollmentService {
     private final EnrollmentRepository enrollmentRepository;
+    private final UserRepository userRepository;
+    private final CourseRepository courseRepository;
     private final JWTUtil jwtUtil;
 
     @Autowired
-    public EnrollmentService(EnrollmentRepository enrollmentRepository, JWTUtil jwtUtil) {
+    public EnrollmentService(EnrollmentRepository enrollmentRepository,
+                             UserRepository userRepository,
+                             CourseRepository courseRepository,
+                             JWTUtil jwtUtil) {
         this.enrollmentRepository = enrollmentRepository;
+        this.userRepository = userRepository;
+        this.courseRepository = courseRepository;
         this.jwtUtil = jwtUtil;
     }
 
@@ -32,23 +42,78 @@ public class EnrollmentService {
         String role = jwtUtil.getRole(token);
         int currentUserId = jwtUtil.getId(token);
 
+        if (!userRepository.existsById(currentUserId)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Error: User does not exist.");
+        }
+
         if (!role.equals("student") && currentUserId != enrollmentRequest.getStudentId()) {
             return ResponseEntity.status(403).body("Access denied: You do not have permission to enroll.");
         }
 
-        // Check if the student is already enrolled
+        Course course = courseRepository.findById(enrollmentRequest.getCourseId()).orElse(null);
+        if (course == null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Error: Course does not exist");
+        } else if (course.getEnrolledStudents() >= course.getMaxStudents()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Error: Course is full");
+        }
+
         boolean alreadyEnrolled = enrollmentRepository.existsByStudentIdAndCourseId(enrollmentRequest.getStudentId(), enrollmentRequest.getCourseId());
         if (alreadyEnrolled) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Student is already enrolled in this course");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Error: Student is already enrolled in this course");
         }
 
         // Enroll the student
-        Enrollment enrollment = new Enrollment();
-        enrollment.setStudentId(enrollmentRequest.getStudentId());
-        enrollment.setCourseId(enrollmentRequest.getCourseId());
-
+        Enrollment enrollment = new Enrollment(
+                enrollmentRequest.getStudentId(),
+                enrollmentRequest.getCourseId());
         enrollmentRepository.save(enrollment);
+        course.setEnrolledStudents(course.getEnrolledStudents() + 1);
+        courseRepository.save(course);
 
-        return ResponseEntity.status(HttpStatus.OK).body("Student enrolled successfully");
+//        enrollmentPublisher.publishUserEnrollment(enrollmentRequest);
+//        enrollmentPublisher.publishCourseEnrollment(enrollmentRequest);
+
+        return ResponseEntity.status(HttpStatus.OK).body("Student enrolled.");
     }
+
+//    @RabbitListener(queues = "userExistenceResultQueue")
+//    public void handleEnrollmentResults(UserExistenceResult result) {
+//        Enrollment enrollment = enrollmentRepository.findByStudentIdAndCourseId(result.getUserId(), result.getCourseId());
+//        if (enrollment != null) {
+//            if ("FAILED".equalsIgnoreCase(result.getStatus())) {
+//                enrollment.setStatus(result.getStatus());
+//                enrollmentRepository.save(enrollment);
+//            }
+//
+//            System.out.println(String.format("Received enrollment result: %s with the reason: %s for student %d in course %d",
+//                    result.getStatus(),
+//                    result.getReason(),
+//                    result.getUserId(),
+//                    result.getCourseId()));
+//        }
+//    }
+//
+//    @RabbitListener(queues = "enrollmentResultQueue")
+//    public void handleEnrollmentResults(EnrollmentResult result) {
+//        Enrollment enrollment = enrollmentRepository.findByStudentIdAndCourseId(result.getStudentId(), result.getCourseId());
+//
+//        if (enrollment != null) {
+//            if ("FAILED".equalsIgnoreCase(result.getStatus())) {
+//                enrollmentRepository.delete(enrollment);
+//                System.out.println("Enrollment failed. Deleted record.");
+//            } else {
+//                enrollment.setStatus(result.getStatus());
+//                enrollmentRepository.save(enrollment);
+//                System.out.println("Enrollment succeeded. Updated record.");
+//            }
+//
+//            System.out.println(String.format("Received enrollment result: %s with the reason: %s for student %d in course %d",
+//                    result.getStatus(),
+//                    result.getReason(),
+//                    result.getStudentId(),
+//                    result.getCourseId()));
+//        } else {
+//            System.out.println("No enrollment found to update.");
+//        }
+//    }
 }
