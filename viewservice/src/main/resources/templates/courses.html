@@ -30,6 +30,8 @@
     </thead>
     <tbody id="coursesTableBody">
     <!-- Dynamic rows will be inserted here -->
+    <p>Loading...</p>
+    <!-- TODO: Do loading -->
     </tbody>
 </table>
 
@@ -55,7 +57,9 @@
 
         try {
             // Fetch courses using Axios
-            const response = await axiosInstance.get("http://localhost:8081/api/courses/available");
+            const response = await axiosInstance.post("http://localhost:8081/api/courses/availabletoenroll", {
+                studentId: decodedToken.id,
+            });
 
             if (response.status === 200) {
                 // Get the courses data
@@ -69,16 +73,46 @@
 
                 courses.forEach(course => {
                     const row = document.createElement("tr");
+
+                    const enrollButtonHtml = course.enrolled
+                        ? "<span>Already Enrolled</span>" // Show text instead of a button if already enrolled
+                        : `<button class="enrollButton" data-course-id="${course.id}">Enroll</button>`; // Enroll button
+
                     row.innerHTML = `
               <td>${course.name}</td>
               <td>${course.instructor}</td>
               <td>${course.timeslot}</td>
               <td>${course.enrolledStudents}</td>
               <td>${course.maxStudents}</td>
-              <td><a href="/enroll">Enroll</a></td>
+              <td>${enrollButtonHtml}</td>
             `;
                     tableBody.appendChild(row);
                 });
+
+                document.querySelectorAll(".enrollButton").forEach(button => {
+                    button.addEventListener("click", async (event) => {
+                        const courseId = event.target.getAttribute("data-course-id");
+
+                        try {
+                            const enrollResponse = await axiosInstance.post(
+                                "http://localhost:8082/api/enroll/enroll",
+                                { studentId: decodedToken.id,
+                                    courseId: courseId }
+                            );
+
+                            if (enrollResponse.status === 200) {
+                                alert("Enrolled successfully!");
+                                location.reload();
+                            } else {
+                                alert("Enrollment failed. Please try again.");
+                            }
+                        } catch (error) {
+                            console.error("Error enrolling:", error);
+                            alert("Failed to enroll. Please try again.");
+                        }
+                    });
+                });
+
             } else {
                 throw new Error("Failed to fetch courses. Please try again later.");
             }

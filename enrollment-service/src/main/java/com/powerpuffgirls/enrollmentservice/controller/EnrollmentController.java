@@ -25,7 +25,7 @@ public class EnrollmentController {
         return ResponseEntity.ok(enrollments);
     }
 
-    @PostMapping()
+    @PostMapping("/enroll")
     public ResponseEntity<String> enrollStudent(@RequestBody EnrollmentRequest enrollmentRequest,
                                                 @RequestHeader("Authorization") String authorizationHeader
     ) {
