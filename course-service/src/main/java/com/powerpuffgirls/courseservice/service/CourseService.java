@@ -11,12 +11,10 @@ import java.util.List;
 @Service
 public class CourseService {
     private final CourseRepository courseRepository;
-    private final JWTUtil jwtUtil;
 
     @Autowired
-    public CourseService(CourseRepository courseRepository, JWTUtil jwtUtil) {
+    public CourseService(CourseRepository courseRepository) {
         this.courseRepository = courseRepository;
-        this.jwtUtil = jwtUtil;
     }
 
     public List<Course> getAllCourses() {

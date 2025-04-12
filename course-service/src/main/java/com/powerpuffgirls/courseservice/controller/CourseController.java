@@ -18,12 +18,14 @@ public class CourseController {
         this.courseService = courseService;
     }
 
+    @CrossOrigin
     @GetMapping()
     public ResponseEntity<List<Course>> getAllCourses() {
         List<Course> courses = courseService.getAllCourses();
         return ResponseEntity.ok(courses);
     }
 
+    @CrossOrigin
     @GetMapping("/available")
     public ResponseEntity<List<Course>> getAvailableCourses() {
         List<Course> courses = courseService.getAvailableCourses();
