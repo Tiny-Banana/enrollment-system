@@ -10,6 +10,9 @@ public class Course {
     private int id;
 
     @Column(nullable = false)
+    private int facultyId;
+
+    @Column(nullable = false)
     private String name;
 
     @Column(nullable = false)
@@ -48,6 +51,30 @@ public class Course {
 //    public void setEnrollments(Set<Enrollment> enrollments) {
 //        this.enrollments = enrollments;
 //    }
+
+    public int getFacultyId() {
+        return facultyId;
+    }
+
+    public void setFacultyId(int facultyId) {
+        this.facultyId = facultyId;
+    }
+
+    public int getEnrolled_students() {
+        return enrolled_students;
+    }
+
+    public void setEnrolled_students(int enrolled_students) {
+        this.enrolled_students = enrolled_students;
+    }
+
+    public int getMax_students() {
+        return max_students;
+    }
+
+    public void setMax_students(int max_students) {
+        this.max_students = max_students;
+    }
 
     public int getEnrolledStudents() {
         return enrolled_students;
