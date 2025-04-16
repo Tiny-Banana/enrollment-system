@@ -61,7 +61,7 @@ public class CourseController {
     @CrossOrigin
     @PostMapping("/handled")
     public ResponseEntity<?> getHandledCourses(@RequestHeader("Authorization") String token,
-                                                                     @RequestBody Map<String, Integer> requestBody) {
+                                               @RequestBody Map<String, Integer> requestBody) {
 
         System.out.println("Request Body: " + requestBody);
         System.out.println("Token: " + token);

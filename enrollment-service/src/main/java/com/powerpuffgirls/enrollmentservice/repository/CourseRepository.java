@@ -16,6 +16,7 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
     List<Course> findAvailableCourses();
 
 
+
     @Query(value = "SELECT new com.powerpuffgirls.enrollmentservice.model.CourseWithEnrollmentStatusDTO(" +
             "c.id, c.name, c.instructor, c.timeslot, c.enrolled_students, c.max_students, " +
             "CASE WHEN e.studentId IS NOT NULL THEN true ELSE false END) " +

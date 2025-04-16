@@ -51,7 +51,7 @@
         const facultyId = decodedToken.id;
 
         try {
-            const response = await axiosInstance.post("http://localhost:8081/api/courses/handled", {
+            const response = await axiosInstance.post("http://localhost:8085/api/grades/handled", {
                 facultyId: facultyId,
             });
 
@@ -69,7 +69,7 @@
             courseDropdown.addEventListener("change", async (event) => {
                 const selectedCourseId = event.target.value;
 
-                const studentsResponse = await axiosInstance.post("http://localhost:8082/api/enroll/students", {
+                const studentsResponse = await axiosInstance.post("http://localhost:8085/api/grades/students", {
                     courseId: selectedCourseId,
                 });
 

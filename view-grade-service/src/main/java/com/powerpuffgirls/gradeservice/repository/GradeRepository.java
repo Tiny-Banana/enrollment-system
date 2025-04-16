@@ -19,7 +19,7 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
     @Query(value = "SELECT g.grade AS grade, c.name AS courseName, s.name AS studentName " +
             "FROM grade g " +
             "JOIN course c ON g.course_id = c.id " +
-            "JOIN User s ON g.student_id = s.id " +
+            "JOIN user s ON g.student_id = s.id " +
             "WHERE g.course_id IN :courseIds", nativeQuery = true)
     List<StudentGradeDTO> findGradesByCourseIds(@Param("courseIds") List<Integer> courseIds);
 }
