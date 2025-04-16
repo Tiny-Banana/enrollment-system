@@ -60,7 +60,30 @@
             }
         } catch (error) {
             console.error("Login error:", error);
-            const errorMessage = error.response?.data || "Invalid credentials. Please try again.";
+
+            let errorMessage = "An unknown error occurred. Please try again.";
+
+            if (error.response) {
+                // Server responded with a status code outside 2xx
+                const status = error.response.status;
+                const data = error.response.data;
+
+                // If the backend sends structured error messages (e.g., { message: "..." })
+                if (typeof data === "string") {
+                    errorMessage = data;
+                } else if (data?.message) {
+                    errorMessage = data.message;
+                } else {
+                    errorMessage = `Server error (${status}).`;
+                }
+            } else if (error.request) {
+                // No response from server (server might be down)
+                errorMessage = "No response from server. Please try again later.";
+            } else {
+                // Other errors (e.g., request setup)
+                errorMessage = error.message || errorMessage;
+            }
+
             document.getElementById("errorMessage").textContent = errorMessage;
         }
     });
